@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Annotated
 
@@ -29,3 +30,12 @@ class PotModeConfig(BaseConfig, frozen=True):
         Path, AfterValidator(_validate_path_is_relative)
     ]
     locale_pot_path: Annotated[Path, AfterValidator(_validate_path_is_relative)]
+
+
+class PoFilePair(BaseModel, frozen=True):
+    checkmk: Annotated[Path, AfterValidator(_validate_path_is_relative)]
+    locale: Annotated[Path, AfterValidator(_validate_path_is_relative)]
+
+
+class PoModeConfig(BaseConfig, frozen=True):
+    po_file_pairs: Sequence[PoFilePair]

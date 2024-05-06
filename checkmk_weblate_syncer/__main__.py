@@ -1,9 +1,11 @@
+import sys
 from pathlib import Path
 from typing import TypeVar
 
 from .cli import Mode, parse_arguments
-from .config import PotModeConfig
+from .config import PoModeConfig, PotModeConfig
 from .logging import LOGGER, configure_logger
+from .po import run as run_po_mode
 from .pot import run as run_pot_mode
 
 
@@ -13,16 +15,12 @@ def _main() -> None:
 
     match args.mode:
         case Mode.POT:
-            run_pot_mode(_load_config(args.config_path, PotModeConfig))
-        # TODO (apparently does not work with enums with only one variant):  # pylint: disable=fixme
-        # case _:
-        #     assert_never(args.mode)
+            sys.exit(run_pot_mode(_load_config(args.config_path, PotModeConfig)))
+        case Mode.PO:
+            sys.exit(run_po_mode(_load_config(args.config_path, PoModeConfig)))
 
 
-# TODO:  # pylint: disable=fixme
-# _ConfigTypeT = TypeVar("_ConfigTypeT", PotModeConfig, PoModeConfig)
-# apparently, type vars cannot have a single constraint, so we have to use bound for now
-_ConfigTypeT = TypeVar("_ConfigTypeT", bound=PotModeConfig)
+_ConfigTypeT = TypeVar("_ConfigTypeT", PotModeConfig, PoModeConfig)
 
 
 def _load_config(config_path: Path, config_type: type[_ConfigTypeT]) -> _ConfigTypeT:

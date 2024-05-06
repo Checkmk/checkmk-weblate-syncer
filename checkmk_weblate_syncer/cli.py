@@ -9,6 +9,7 @@ from pydantic import AfterValidator, BaseModel, Field
 
 class Mode(Enum):
     POT = "pot"
+    PO = "po"
 
 
 def _parse_log_level(raw: int) -> int:
@@ -33,7 +34,7 @@ def parse_arguments() -> Arguments:
         type=str,
         choices=[mode.value for mode in Mode],
         metavar="MODE",
-        help="Operation mode. pot: Update pot file.",
+        help="Operation mode. pot: Update pot file. po: Update po files.",
     )
     parser.add_argument(
         "config_path",
