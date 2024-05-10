@@ -35,11 +35,12 @@ def _repository_in_clean_state(path: Path, branch: str) -> Repo:
 
 def commit_and_push_files(
     repo: Repo,
-    files_to_push_to_repo: Sequence[Path],
+    files: Sequence[Path],
+    commit_message: str,
 ) -> None:
     try:
-        repo.index.add(files_to_push_to_repo)
-        repo.index.commit("Updating files")
+        repo.index.add(files)
+        repo.index.commit(commit_message)
         repo.remotes.origin.push()
     except CalledProcessError as e:
         LOGGER.error(

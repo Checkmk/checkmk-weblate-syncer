@@ -30,6 +30,7 @@ class PotModeConfig(BaseConfig, frozen=True):
         Path, AfterValidator(_validate_path_is_relative)
     ]
     locale_pot_path: Annotated[Path, AfterValidator(_validate_path_is_relative)]
+    commit_message: str
 
 
 class PoFilePair(BaseModel, frozen=True):
@@ -39,3 +40,4 @@ class PoFilePair(BaseModel, frozen=True):
 
 class PoModeConfig(BaseConfig, frozen=True):
     po_file_pairs: Sequence[PoFilePair]
+    commit_message: str

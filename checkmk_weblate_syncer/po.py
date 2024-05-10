@@ -54,7 +54,8 @@ def run(config: PoModeConfig) -> int:
         LOGGER.info("Committing and pushing .po files to checkmk repository")
         commit_and_push_files(
             repo=checkmk_repo,
-            files_to_push_to_repo=[success.path for success in successes],
+            files=[success.path for success in successes],
+            commit_message=config.commit_message,
         )
     else:
         LOGGER.info("No changes in checkmk repository.")
