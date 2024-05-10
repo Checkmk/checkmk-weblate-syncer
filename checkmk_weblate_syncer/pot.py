@@ -49,6 +49,7 @@ def run(config: PotModeConfig) -> int:
     LOGGER.info("Committing and pushing pot file to locale repository")
     commit_and_push_files(
         repo=locale_repo,
-        files_to_push_to_repo=[path_pot_file],
+        files=[path_pot_file],
+        commit_message=config.commit_message,
     )
     return 0
