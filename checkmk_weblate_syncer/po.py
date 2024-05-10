@@ -48,10 +48,10 @@ def run(config: PoModeConfig) -> int:
                 failures.append(result)
             case _:
                 assert_never(result)
-    LOGGER.info("Checking if any .po files changed in the checkmk repository")
 
-    if _check_if_repo_is_dirty(checkmk_repo):
-        LOGGER.info("Committing and pushing .po file to checkmk repository")
+    LOGGER.info("Checking if any .po files changed in the checkmk repository")
+    if _is_repo_dirty(checkmk_repo):
+        LOGGER.info("Committing and pushing .po files to checkmk repository")
         commit_and_push_files(
             repo=checkmk_repo,
             files_to_push_to_repo=[success.path for success in successes],
@@ -100,33 +100,29 @@ def _process_po_file_pair(
     LOGGER.info("Writing stripped .po file to checkmk repository: %s", checkmk_po_file)
     try:
         checkmk_po_file.write_text(po_file_content)
-    except Exception as e:  # pylint: disable=broad-except
+    except IOError as e:
         return _Failure(
-            f"Encountered error while writing po file to checkmk repository: {str(e)}",
+            f"Encountered error while writing po file to checkmk repository: {e}",
             checkmk_po_file,
         )
     return _Success(checkmk_po_file)
 
 
-def _check_if_repo_is_dirty(repo: Repo) -> bool:
+def _is_repo_dirty(repo: Repo) -> bool:
     try:
-        if not repo.is_dirty(untracked_files=True):
-            LOGGER.info("No changes, exiting")
-            return False
+        return repo.is_dirty(untracked_files=True)
     except Exception as e:
         LOGGER.error(
             "Checking if any .po files changed in the checkmk repository failed"
         )
-        LOGGER.exception(e)
         raise e
-    return True
 
 
 def _remove_unwanted_lines(file_path: Path) -> str | _Failure:
     LOGGER.info("Reading %s", file_path)
     try:
         po_file_content = file_path.read_text()
-    except Exception as e:  # pylint: disable=broad-except
+    except IOError as e:
         return _Failure(
             error_message=f"Encountered error while reading file: {str(e)}",
             path=file_path,

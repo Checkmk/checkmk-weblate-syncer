@@ -21,7 +21,6 @@ def repository_in_clean_state(
         LOGGER.error(
             "Error while cleaning up and updating %s repository", repo_config.path
         )
-        LOGGER.exception(e)
         raise e
 
 
@@ -46,7 +45,6 @@ def commit_and_push_files(
         LOGGER.error(
             "Committing and pushing files for repository %s failed", repo.working_dir
         )
-        LOGGER.exception(e)
         raise e
     LOGGER.info(
         "Committing and pushing files for repository %s succeeded", repo.working_dir

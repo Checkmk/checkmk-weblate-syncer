@@ -23,7 +23,6 @@ def _parse_log_level(raw: int) -> int:
 class Arguments(BaseModel, frozen=True):
     mode: Mode
     config_path: Path
-    log_path: Path | None
     log_level: Annotated[int, AfterValidator(_parse_log_level)] = Field(alias="verbose")
 
 
@@ -41,12 +40,6 @@ def parse_arguments() -> Arguments:
         type=Path,
         metavar="CONFIG_PATH",
         help="Configuration file path.",
-    )
-    parser.add_argument(
-        "--log_path",
-        type=Path,
-        metavar="LOG_PATH",
-        help="Log file path. If left unspecified, the program will log to standard error.",
     )
     parser.add_argument(
         "--verbose",
