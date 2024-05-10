@@ -24,11 +24,9 @@ def run(config: PotModeConfig) -> int:
             e.stdout,
             e.stderr,
         )
-        LOGGER.exception(e)
         raise e
     except Exception as e:
         LOGGER.error("Generating pot file failed")
-        LOGGER.exception(e)
         raise e
 
     LOGGER.info("Writing pot file to locale repository")
@@ -37,7 +35,6 @@ def run(config: PotModeConfig) -> int:
         path_pot_file.write_text(completed_pot_generation_process.stdout)
     except Exception as e:
         LOGGER.error("Writing pot file failed")
-        LOGGER.exception(e)
         raise e
 
     LOGGER.info("Checking if pot file has changed in locale repository")
@@ -47,7 +44,6 @@ def run(config: PotModeConfig) -> int:
             return 0
     except Exception as e:
         LOGGER.error("Checking if pot file has changed failed")
-        LOGGER.exception(e)
         raise e
 
     LOGGER.info("Committing and pushing pot file to locale repository")
