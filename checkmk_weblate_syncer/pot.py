@@ -1,3 +1,5 @@
+import re
+from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import run as run_subprocess
 
@@ -29,10 +31,16 @@ def run(config: PotModeConfig) -> int:
         LOGGER.error("Generating pot file failed")
         raise e
 
+    LOGGER.info("Making source string locations relative")
+    pot_file_content = _make_soure_string_locations_relative(
+        pot_file_content=completed_pot_generation_process.stdout,
+        relative_to=config.checkmk_repository.path,
+    )
+
     LOGGER.info("Writing pot file to locale repository")
     path_pot_file = config.locale_repository.path / config.locale_pot_path
     try:
-        path_pot_file.write_text(completed_pot_generation_process.stdout)
+        path_pot_file.write_text(pot_file_content)
     except IOError as e:
         LOGGER.error("Writing pot file failed")
         raise e
@@ -53,3 +61,15 @@ def run(config: PotModeConfig) -> int:
         commit_message=config.commit_message,
     )
     return 0
+
+
+def _make_soure_string_locations_relative(
+    pot_file_content: str,
+    relative_to: Path,
+) -> str:
+    return re.sub(
+        rf"^#: ({relative_to}\/)(.*?:\d+)\n",
+        r"#: \g<2>\n",
+        pot_file_content,
+        flags=re.MULTILINE | re.DOTALL,
+    )
