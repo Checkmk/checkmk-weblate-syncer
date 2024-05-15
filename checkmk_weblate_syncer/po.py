@@ -95,9 +95,18 @@ def _process_po_file_pair(
     except IOError as e:
         return _Failure(error_message=str(e), path=locale_po_file)
 
-    LOGGER.info("Removing unwanted lines from %s", locale_po_file)
-    if isinstance(po_file_content := _remove_unwanted_lines(locale_po_file), _Failure):
-        return po_file_content
+    LOGGER.info("Reading %s", locale_po_file)
+    try:
+        po_file_content = locale_po_file.read_text()
+    except IOError as e:
+        return _Failure(
+            error_message=f"Encountered error while reading file: {str(e)}",
+            path=locale_po_file,
+        )
+
+    LOGGER.info("Stripping source string locations and Last-Translator")
+    po_file_content = _remove_source_string_locations(po_file_content)
+    po_file_content = _remove_last_translator(po_file_content)
 
     LOGGER.info("Writing stripped .po file to checkmk repository: %s", checkmk_po_file)
     try:
@@ -110,6 +119,24 @@ def _process_po_file_pair(
     return _Success(checkmk_po_file)
 
 
+def _remove_source_string_locations(po_file_content: str) -> str:
+    return re.sub(
+        r"^#: .*?:\d+\n",
+        "",
+        po_file_content,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+
+
+def _remove_last_translator(po_file_content: str) -> str:
+    return re.sub(
+        r"^\"Last-Translator:.*?\"\n",
+        "",
+        po_file_content,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+
+
 def _is_repo_dirty(repo: Repo) -> bool:
     try:
         return repo.is_dirty(untracked_files=True)
@@ -118,22 +145,3 @@ def _is_repo_dirty(repo: Repo) -> bool:
             "Checking if any .po files changed in the checkmk repository failed"
         )
         raise e
-
-
-def _remove_unwanted_lines(file_path: Path) -> str | _Failure:
-    LOGGER.info("Reading %s", file_path)
-    try:
-        po_file_content = file_path.read_text()
-    except IOError as e:
-        return _Failure(
-            error_message=f"Encountered error while reading file: {str(e)}",
-            path=file_path,
-        )
-    LOGGER.info("Removing code comments from %s", file_path)
-    po_file_content = re.sub(r"^#.+\d\n", "", po_file_content, flags=re.DOTALL)
-
-    LOGGER.info("Removing last translator information from %s", file_path)
-    po_file_content = re.sub(
-        r"\"Last-Translator:.+?\n", "", po_file_content, flags=re.DOTALL
-    )
-    return po_file_content
