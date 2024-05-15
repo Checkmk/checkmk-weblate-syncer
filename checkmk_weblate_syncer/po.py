@@ -31,6 +31,7 @@ def run(config: PoModeConfig) -> int:
     successes: list[_Success] = []
 
     for file_pair in config.po_file_pairs:
+        LOGGER.info("Processing %s, %s", file_pair.locale, file_pair.checkmk)
         match (
             result := _process_po_file_pair(
                 file_pair=file_pair,
@@ -42,7 +43,7 @@ def run(config: PoModeConfig) -> int:
                 successes.append(result)
             case _Failure():
                 LOGGER.error(
-                    "We encountered an error while processing the .po file. "
+                    "Encountered an error while processing the .po file pair. "
                     "See the logging output at the end for more information."
                 )
                 failures.append(result)
@@ -79,7 +80,7 @@ def _process_po_file_pair(
 ) -> _Success | _Failure:
     checkmk_po_file = checkmk_repo.path / file_pair.checkmk
     locale_po_file = locale_repo.path / file_pair.locale
-    LOGGER.info("Checking formatting errors in %s", locale_po_file)
+    LOGGER.info("Checking for formatting errors in %s", locale_po_file)
     try:
         run_subprocess(
             ["msgfmt", "--check-format", "-o", "-", locale_po_file],
