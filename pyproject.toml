@@ -17,6 +17,7 @@ mypy = "*"
 black = "*"
 isort = "*"
 pylint = "*"
+pytest = "*"
 
 [build-system]
 requires = ["poetry-core"]
