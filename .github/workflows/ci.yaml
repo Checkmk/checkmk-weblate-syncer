@@ -24,3 +24,5 @@ jobs:
     - run: poetry run mypy ./
 
     - run: poetry run pylint checkmk_weblate_syncer/ tests/
+
+    - run: poetry run pytest tests/
