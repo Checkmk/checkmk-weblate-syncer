@@ -25,7 +25,7 @@ def run(config: PotModeConfig) -> int:
             e.stderr,
         )
         raise e
-    except Exception as e:
+    except IOError as e:
         LOGGER.error("Generating pot file failed")
         raise e
 
@@ -33,7 +33,7 @@ def run(config: PotModeConfig) -> int:
     path_pot_file = config.locale_repository.path / config.locale_pot_path
     try:
         path_pot_file.write_text(completed_pot_generation_process.stdout)
-    except Exception as e:
+    except IOError as e:
         LOGGER.error("Writing pot file failed")
         raise e
 

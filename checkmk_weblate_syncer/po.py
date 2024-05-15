@@ -91,7 +91,7 @@ def _process_po_file_pair(
         return _Failure(
             error_message=f"Found formatting errors: {e.stderr}", path=locale_po_file
         )
-    except Exception as e:  # pylint: disable=broad-except
+    except IOError as e:
         return _Failure(error_message=str(e), path=locale_po_file)
 
     LOGGER.info("Removing unwanted lines from %s", locale_po_file)
