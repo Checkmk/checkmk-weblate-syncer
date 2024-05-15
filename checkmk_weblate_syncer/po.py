@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from subprocess import CalledProcessError
+from subprocess import DEVNULL, PIPE, CalledProcessError
 from subprocess import run as run_subprocess
 from typing import assert_never
 
@@ -85,7 +85,8 @@ def _process_po_file_pair(
         run_subprocess(
             ["msgfmt", "--check-format", "-o", "-", locale_po_file],
             check=True,
-            capture_output=True,
+            stdout=DEVNULL,
+            stderr=PIPE,
             encoding="UTF-8",
         )
     except CalledProcessError as e:
