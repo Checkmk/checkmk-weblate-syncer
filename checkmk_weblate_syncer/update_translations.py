@@ -1,4 +1,3 @@
-import re
 from dataclasses import dataclass
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, CalledProcessError
@@ -10,6 +9,7 @@ from git import Repo
 from .config import PoFilePair, RepositoryConfig, UpdateTranslationsConfig
 from .git import commit_and_push_files, repository_in_clean_state
 from .logging import LOGGER
+from .portable_object import remove_last_translator, remove_source_string_locations
 
 
 @dataclass(frozen=True)
@@ -106,8 +106,8 @@ def _process_po_file_pair(
         )
 
     LOGGER.info("Stripping source string locations and Last-Translator")
-    po_file_content = _remove_source_string_locations(po_file_content)
-    po_file_content = _remove_last_translator(po_file_content)
+    po_file_content = remove_source_string_locations(po_file_content)
+    po_file_content = remove_last_translator(po_file_content)
 
     LOGGER.info("Writing stripped .po file to checkmk repository: %s", checkmk_po_file)
     try:
@@ -118,24 +118,6 @@ def _process_po_file_pair(
             checkmk_po_file,
         )
     return _Success(checkmk_po_file)
-
-
-def _remove_source_string_locations(po_file_content: str) -> str:
-    return re.sub(
-        r"^#: .*?:\d+\n",
-        "",
-        po_file_content,
-        flags=re.MULTILINE | re.DOTALL,
-    )
-
-
-def _remove_last_translator(po_file_content: str) -> str:
-    return re.sub(
-        r"^\"Last-Translator:.*?\"\n",
-        "",
-        po_file_content,
-        flags=re.MULTILINE | re.DOTALL,
-    )
 
 
 def _is_repo_dirty(repo: Repo) -> bool:
