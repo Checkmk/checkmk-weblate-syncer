@@ -1,11 +1,10 @@
-import re
-from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import run as run_subprocess
 
 from .config import UpdateSourcesConfig
 from .git import commit_and_push_files, repository_in_clean_state
 from .logging import LOGGER
+from .portable_object import make_soure_string_locations_relative
 
 
 def run(config: UpdateSourcesConfig) -> int:
@@ -14,12 +13,12 @@ def run(config: UpdateSourcesConfig) -> int:
 
     LOGGER.info("Calling pot generation script")
     try:
-        completed_pot_generation_process = run_subprocess(
+        pot_file_content = run_subprocess(
             config.checkmk_repository.path / config.checkmk_pot_generation_script,
             check=True,
             capture_output=True,
             encoding="UTF-8",
-        )
+        ).stdout
     except CalledProcessError as e:
         LOGGER.error(
             "Generating pot file failed.\n\nStdout:\n%s\n\nStderr:\n%s",
@@ -32,8 +31,8 @@ def run(config: UpdateSourcesConfig) -> int:
         raise e
 
     LOGGER.info("Making source string locations relative")
-    pot_file_content = _make_soure_string_locations_relative(
-        pot_file_content=completed_pot_generation_process.stdout,
+    pot_file_content = make_soure_string_locations_relative(
+        portable_object_content=pot_file_content,
         relative_to=config.checkmk_repository.path,
     )
 
@@ -61,15 +60,3 @@ def run(config: UpdateSourcesConfig) -> int:
         commit_message=config.commit_message,
     )
     return 0
-
-
-def _make_soure_string_locations_relative(
-    pot_file_content: str,
-    relative_to: Path,
-) -> str:
-    return re.sub(
-        rf"^#: ({relative_to}\/)(.*?:\d+)\n",
-        r"#: \g<2>\n",
-        pot_file_content,
-        flags=re.MULTILINE | re.DOTALL,
-    )
