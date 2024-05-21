@@ -25,7 +25,7 @@ class BaseConfig(BaseModel, frozen=True):
     locale_repository: RepositoryConfig
 
 
-class PotModeConfig(BaseConfig, frozen=True):
+class UpdateSourcesConfig(BaseConfig, frozen=True):
     checkmk_pot_generation_script: Annotated[
         Path, AfterValidator(_validate_path_is_relative)
     ]
@@ -38,6 +38,6 @@ class PoFilePair(BaseModel, frozen=True):
     locale: Annotated[Path, AfterValidator(_validate_path_is_relative)]
 
 
-class PoModeConfig(BaseConfig, frozen=True):
+class UpdateTranslationsConfig(BaseConfig, frozen=True):
     po_file_pairs: Sequence[PoFilePair]
     commit_message: str

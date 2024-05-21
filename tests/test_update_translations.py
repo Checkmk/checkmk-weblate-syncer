@@ -1,4 +1,4 @@
-from checkmk_weblate_syncer.po import (
+from checkmk_weblate_syncer.update_translations import (
     _remove_last_translator,
     _remove_source_string_locations,
 )

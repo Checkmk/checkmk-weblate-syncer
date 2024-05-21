@@ -3,12 +3,12 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import run as run_subprocess
 
-from .config import PotModeConfig
+from .config import UpdateSourcesConfig
 from .git import commit_and_push_files, repository_in_clean_state
 from .logging import LOGGER
 
 
-def run(config: PotModeConfig) -> int:
+def run(config: UpdateSourcesConfig) -> int:
     repository_in_clean_state(config.checkmk_repository)
     locale_repo = repository_in_clean_state(config.locale_repository)
 

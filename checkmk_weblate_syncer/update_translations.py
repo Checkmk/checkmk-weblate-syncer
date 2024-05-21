@@ -7,7 +7,7 @@ from typing import assert_never
 
 from git import Repo
 
-from .config import PoFilePair, PoModeConfig, RepositoryConfig
+from .config import PoFilePair, RepositoryConfig, UpdateTranslationsConfig
 from .git import commit_and_push_files, repository_in_clean_state
 from .logging import LOGGER
 
@@ -23,7 +23,7 @@ class _Failure:
     path: Path
 
 
-def run(config: PoModeConfig) -> int:
+def run(config: UpdateTranslationsConfig) -> int:
     checkmk_repo = repository_in_clean_state(config.checkmk_repository)
     repository_in_clean_state(config.locale_repository)
 

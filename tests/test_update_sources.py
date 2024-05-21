@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from checkmk_weblate_syncer.pot import _make_soure_string_locations_relative
+from checkmk_weblate_syncer.update_sources import _make_soure_string_locations_relative
 
 
 def test_make_soure_string_locations_relative() -> None:
