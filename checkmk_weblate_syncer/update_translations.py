@@ -8,8 +8,13 @@ from git import Repo
 
 from .config import PoFilePair, RepositoryConfig, UpdateTranslationsConfig
 from .git import commit_and_push_files, repository_in_clean_state
+from .html_tags import forbidden_tags
 from .logging import LOGGER
-from .portable_object import remove_last_translator, remove_source_string_locations
+from .portable_object import (
+    remove_header,
+    remove_last_translator,
+    remove_source_string_locations,
+)
 
 
 @dataclass(frozen=True)
@@ -102,6 +107,13 @@ def _process_po_file_pair(
     except IOError as e:
         return _Failure(
             error_message=f"Encountered error while reading file: {str(e)}",
+            path=locale_po_file,
+        )
+
+    LOGGER.info("Checking HTML tags")
+    if forbidden_html_tags := forbidden_tags(remove_header(po_file_content)):
+        return _Failure(
+            error_message=f"Found forbidden HTML tags: {', '.join(sorted(forbidden_html_tags))}",
             path=locale_po_file,
         )
 
