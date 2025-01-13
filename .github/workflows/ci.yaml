@@ -5,24 +5,20 @@ on: [push, pull_request]
 
 jobs:
   tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5
+    - uses: astral-sh/setup-uv@v5
       with:
-        python-version-file: "pyproject.toml"
+        version: "latest"
 
-    - run: python3 -m pip install poetry
+    - run: uv sync
 
-    - run: poetry install --with dev
+    - run: uv run ruff format --diff
 
-    - run: poetry run black --check ./
+    - run: uv run ruff check
 
-    - run: poetry run isort --check-only ./
+    - run: uv run mypy src tests
 
-    - run: poetry run mypy ./
-
-    - run: poetry run pylint checkmk_weblate_syncer/ tests/
-
-    - run: poetry run pytest tests/
+    - run: uv run pytest

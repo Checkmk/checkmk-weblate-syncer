@@ -37,12 +37,10 @@ def run(config: UpdateTranslationsConfig) -> int:
 
     for file_pair in config.po_file_pairs:
         LOGGER.info("Processing %s, %s", file_pair.locale, file_pair.checkmk)
-        match (
-            result := _process_po_file_pair(
-                file_pair=file_pair,
-                checkmk_repo=config.checkmk_repository,
-                locale_repo=config.locale_repository,
-            )
+        match result := _process_po_file_pair(
+            file_pair=file_pair,
+            checkmk_repo=config.checkmk_repository,
+            locale_repo=config.locale_repository,
         ):
             case _Success():
                 successes.append(result)

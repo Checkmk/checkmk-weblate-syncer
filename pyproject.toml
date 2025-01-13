@@ -1,33 +1,30 @@
-[tool.poetry]
+[project]
 name = "checkmk-weblate-syncer"
-version = "0.1.0"
-description = ""
-authors = ["Joerg Herbel <joerg.herbel@checkmk.com>"]
+version = "0.2.0"
+description = "Synchronization between the Checkmk source repository and Weblate"
 readme = "README.md"
+authors = [
+    { name = "Jörg Herbel", email = "joerg.herbel@checkmk.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "gitpython>=3.1.44",
+    "pydantic>=2.10.5",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-pydantic = "^2.7.1"
-gitpython = "^3.1.43"
-
-[tool.poetry.group.dev]
-optional = true
-[tool.poetry.group.dev.dependencies]
-mypy = "*"
-black = "*"
-isort = "*"
-pylint = "*"
-pytest = "*"
+[project.scripts]
+checkmk-weblate-syncer = "checkmk_weblate_syncer:__main__"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14.1",
+    "pytest>=8.3.4",
+    "ruff>=0.9.1",
+]
 
 [tool.mypy]
 strict = true
-
-[tool.pylint.'MESSAGES CONTROL']
-disable = "missing-docstring"
-
-[tool.isort]
-profile = "black"
