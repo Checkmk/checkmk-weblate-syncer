@@ -27,7 +27,8 @@ class BaseConfig(BaseModel, frozen=True):
 
 class UpdateSourcesConfig(BaseConfig, frozen=True):
     checkmk_pot_generation_script: Annotated[
-        Path, AfterValidator(_validate_path_is_relative)
+        Path,
+        AfterValidator(_validate_path_is_relative),
     ]
     locale_pot_path: Annotated[Path, AfterValidator(_validate_path_is_relative)]
     commit_message: str

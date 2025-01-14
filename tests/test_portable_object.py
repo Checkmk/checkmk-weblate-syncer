@@ -45,7 +45,7 @@ msgstr ""
 #, python-format
 msgid " (Duration: %s)"
 msgstr ""
-"""
+""",
         )
         # pylint: disable=line-too-long
         == """#: /home/weblate/checkmk_weblate_sync/git/checkmk/cmk/gui/wato/pages/host_rename.py:640
@@ -183,7 +183,7 @@ msgstr " (%d mal)"
 #: cmk/gui/visuals/_page_edit_visual.py:137
 msgid " (Copy)"
 msgstr " (Kopie)"
-"""
+""",
         )
         == """# Copyright (C) 2019 Checkmk GmbH - License: GNU General Public License v2
 # This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
@@ -255,7 +255,7 @@ msgstr " (%d mal)"
 #: cmk/gui/visuals/_page_edit_visual.py:137
 msgid " (Copy)"
 msgstr " (Kopie)"
-"""
+""",
         )
         == """# Copyright (C) 2019 Checkmk GmbH - License: GNU General Public License v2
 # This file is part of Checkmk (https://checkmk.com). It is subject to the terms and

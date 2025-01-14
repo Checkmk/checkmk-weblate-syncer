@@ -5,7 +5,7 @@ from subprocess import CalledProcessError
 from git import Repo
 
 from .config import RepositoryConfig
-from .logging import LOGGER
+from .logger import LOGGER
 
 
 def repository_in_clean_state(
@@ -17,11 +17,12 @@ def repository_in_clean_state(
             repo_config.path,
             repo_config.branch,
         )
-    except Exception as e:
+    except Exception:
         LOGGER.error(
-            "Error while cleaning up and updating %s repository", repo_config.path
+            "Error while cleaning up and updating %s repository",
+            repo_config.path,
         )
-        raise e
+        raise
 
 
 def _repository_in_clean_state(path: Path, branch: str) -> Repo:
@@ -42,11 +43,13 @@ def commit_and_push_files(
         repo.index.add(files)
         repo.index.commit(commit_message)
         repo.remotes.origin.push()
-    except CalledProcessError as e:
+    except CalledProcessError:
         LOGGER.error(
-            "Committing and pushing files for repository %s failed", repo.working_dir
+            "Committing and pushing files for repository %s failed",
+            repo.working_dir,
         )
-        raise e
+        raise
     LOGGER.info(
-        "Committing and pushing files for repository %s succeeded", repo.working_dir
+        "Committing and pushing files for repository %s succeeded",
+        repo.working_dir,
     )

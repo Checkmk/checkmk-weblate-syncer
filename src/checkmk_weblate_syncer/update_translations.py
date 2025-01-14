@@ -9,7 +9,7 @@ from git import Repo
 from .config import PoFilePair, RepositoryConfig, UpdateTranslationsConfig
 from .git import commit_and_push_files, repository_in_clean_state
 from .html_tags import forbidden_tags
-from .logging import LOGGER
+from .logger import LOGGER
 from .portable_object import (
     remove_header,
     remove_last_translator,
@@ -47,7 +47,7 @@ def run(config: UpdateTranslationsConfig) -> int:
             case _Failure():
                 LOGGER.error(
                     "Encountered an error while processing the .po file pair. "
-                    "See the logging output at the end for more information."
+                    "See the logging output at the end for more information.",
                 )
                 failures.append(result)
             case _:
@@ -85,8 +85,14 @@ def _process_po_file_pair(
     locale_po_file = locale_repo.path / file_pair.locale
     LOGGER.info("Checking for formatting errors in %s", locale_po_file)
     try:
-        run_subprocess(
-            ["msgfmt", "--check-format", "-o", "-", locale_po_file],
+        run_subprocess(  # noqa: S603
+            [
+                "/usr/bin/msgfmt",
+                "--check-format",
+                "-o",
+                "-",
+                locale_po_file,
+            ],
             check=True,
             stdout=DEVNULL,
             stderr=PIPE,
@@ -94,17 +100,18 @@ def _process_po_file_pair(
         )
     except CalledProcessError as e:
         return _Failure(
-            error_message=f"Found formatting errors: {e.stderr}", path=locale_po_file
+            error_message=f"Found formatting errors: {e.stderr}",
+            path=locale_po_file,
         )
-    except IOError as e:
+    except OSError as e:
         return _Failure(error_message=str(e), path=locale_po_file)
 
     LOGGER.info("Reading %s", locale_po_file)
     try:
         po_file_content = locale_po_file.read_text()
-    except IOError as e:
+    except OSError as e:
         return _Failure(
-            error_message=f"Encountered error while reading file: {str(e)}",
+            error_message=f"Encountered error while reading file: {e}",
             path=locale_po_file,
         )
 
@@ -122,10 +129,10 @@ def _process_po_file_pair(
     LOGGER.info("Writing stripped .po file to checkmk repository: %s", checkmk_po_file)
     try:
         checkmk_po_file.write_text(po_file_content)
-    except IOError as e:
+    except OSError as e:
         return _Failure(
-            f"Encountered error while writing po file to checkmk repository: {e}",
-            checkmk_po_file,
+            error_message=f"Encountered error while writing po file to checkmk repository: {e}",
+            path=checkmk_po_file,
         )
     return _Success(checkmk_po_file)
 
@@ -133,8 +140,8 @@ def _process_po_file_pair(
 def _is_repo_dirty(repo: Repo) -> bool:
     try:
         return repo.is_dirty(untracked_files=True)
-    except Exception as e:
+    except Exception:
         LOGGER.error(
-            "Checking if any .po files changed in the checkmk repository failed"
+            "Checking if any .po files changed in the checkmk repository failed",
         )
-        raise e
+        raise
