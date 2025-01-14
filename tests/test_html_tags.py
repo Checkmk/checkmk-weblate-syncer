@@ -4,7 +4,7 @@ from checkmk_weblate_syncer.html_tags import forbidden_tags
 
 
 @pytest.mark.parametrize(
-    ["text", "expected_result"],
+    ("text", "expected_result"),
     [
         pytest.param(
             "abc123",
