@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import TypeVar, assert_never
+from typing import assert_never
 
 from .cli import Mode, parse_arguments
 from .config import UpdateSourcesConfig, UpdateTranslationsConfig
@@ -29,10 +29,10 @@ def main() -> int:
 if __name__ == "__main__":
     sys.exit(main())
 
-_ConfigTypeT = TypeVar("_ConfigTypeT", UpdateSourcesConfig, UpdateTranslationsConfig)
 
-
-def _load_config(config_path: Path, config_type: type[_ConfigTypeT]) -> _ConfigTypeT:
+def _load_config[T: (UpdateSourcesConfig, UpdateTranslationsConfig)](
+    config_path: Path, config_type: type[T]
+) -> T:
     try:
         return config_type.model_validate_json(config_path.read_text())
     except Exception:
