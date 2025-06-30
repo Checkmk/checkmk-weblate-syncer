@@ -9,24 +9,25 @@ from .update_sources import run as run_update_sources
 from .update_translations import run as run_update_translations
 
 
-def _main() -> None:
+def main() -> int:
     args = parse_arguments()
     configure_logger(args.log_level)
 
     match args.mode:
         case Mode.UPDATE_SOURCES:
-            sys.exit(
-                run_update_sources(_load_config(args.config_path, UpdateSourcesConfig)),
+            return run_update_sources(
+                _load_config(args.config_path, UpdateSourcesConfig)
             )
         case Mode.UPDATE_TRANSLATIONS:
-            sys.exit(
-                run_update_translations(
-                    _load_config(args.config_path, UpdateTranslationsConfig),
-                ),
+            return run_update_translations(
+                _load_config(args.config_path, UpdateTranslationsConfig)
             )
         case _:
             assert_never(args.mode)
 
+
+if __name__ == "__main__":
+    sys.exit(main())
 
 _ConfigTypeT = TypeVar("_ConfigTypeT", UpdateSourcesConfig, UpdateTranslationsConfig)
 
@@ -37,6 +38,3 @@ def _load_config(config_path: Path, config_type: type[_ConfigTypeT]) -> _ConfigT
     except Exception:
         LOGGER.error("Loading config failed")
         raise
-
-
-_main()
