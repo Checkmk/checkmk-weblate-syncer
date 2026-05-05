@@ -1,4 +1,5 @@
 import re
+from dataclasses import dataclass
 
 # keep in sync with tests/pylint/checker_localization.py:HTMLTagsChecker
 _TAG_PATTERN = re.compile("<.*?>")
@@ -7,12 +8,18 @@ _ALLOWED_TAGS_PATTERN = re.compile(
 )
 
 
-def forbidden_tags(text: str) -> set[str]:
-    return {
-        tag
-        for tag in re.findall(
-            _TAG_PATTERN,
-            text,
+@dataclass(frozen=True)
+class ForbiddenTag:
+    line: int
+    tag: str
+
+
+def forbidden_tags(text: str) -> frozenset[ForbiddenTag]:
+    return frozenset(
+        ForbiddenTag(
+            line=text.count("\n", 0, match.start()) + 1,
+            tag=match.group(),
         )
-        if not re.match(_ALLOWED_TAGS_PATTERN, tag)
-    }
+        for match in _TAG_PATTERN.finditer(text)
+        if not _ALLOWED_TAGS_PATTERN.match(match.group())
+    )

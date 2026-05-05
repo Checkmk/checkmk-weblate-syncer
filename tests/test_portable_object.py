@@ -1,17 +1,19 @@
 from pathlib import Path
 
+from checkmk_weblate_syncer.html_tags import ForbiddenTag
 from checkmk_weblate_syncer.portable_object import (
+    format_forbidden_tags_error,
     make_soure_string_locations_relative,
     remove_header,
     remove_last_translator,
     remove_source_string_locations,
+    source_references_at,
 )
 
 
 def test_remove_header() -> None:
-    assert (
-        remove_header(
-            """# Copyright (C) 2019 Checkmk GmbH - License: GNU General Public License v2
+    body, header_line_count = remove_header(
+        """# Copyright (C) 2019 Checkmk GmbH - License: GNU General Public License v2
 # This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
 # conditions defined in the file COPYING, which is part of this source code package.
 
@@ -46,8 +48,10 @@ msgstr ""
 msgid " (Duration: %s)"
 msgstr ""
 """,
-        )
-        # pylint: disable=line-too-long
+    )
+    # pylint: disable=line-too-long
+    assert (
+        body
         == """#: /home/weblate/checkmk_weblate_sync/git/checkmk/cmk/gui/wato/pages/host_rename.py:640
 #, python-format
 msgid " (%d times)"
@@ -66,6 +70,56 @@ msgstr ""
 msgid " (Duration: %s)"
 msgstr ""
 """
+    )
+    expected_header_line_count = 27
+    assert header_line_count == expected_header_line_count
+
+
+def test_source_references_at() -> None:
+    content = """#: cmk/gui/foo.py:10
+#: cmk/gui/bar.py:20
+msgid "hello"
+msgstr "hallo"
+
+#: cmk/gui/baz.py:30
+msgid "world"
+msgstr "welt"
+"""
+    # msgstr "hallo" is on line 4 → both refs from the first block
+    assert source_references_at(content, 4) == (
+        "cmk/gui/foo.py:10",
+        "cmk/gui/bar.py:20",
+    )
+    # msgstr "welt" is on line 8 → only the ref from the second block
+    assert source_references_at(content, 8) == ("cmk/gui/baz.py:30",)
+    # out-of-range line returns empty
+    assert source_references_at(content, 999) == ()
+
+
+def test_format_forbidden_tags_error() -> None:
+    content = """# header line
+# header line
+
+#: cmk/gui/foo.py:10
+#: cmk/gui/bar.py:20
+msgid "hello"
+msgstr "<bad>oops</bad>"
+"""
+    # body starts at file line 4 (1-indexed); header_line_count = 3
+    error = format_forbidden_tags_error(
+        content,
+        header_line_count=3,
+        tags=frozenset(
+            {
+                ForbiddenTag(line=4, tag="<bad>"),
+                ForbiddenTag(line=4, tag="</bad>"),
+            },
+        ),
+    )
+    assert error == (
+        "Found forbidden HTML tags:\n"
+        "  line 7: '</bad>' (cmk/gui/foo.py:10, cmk/gui/bar.py:20)\n"
+        "  line 7: '<bad>' (cmk/gui/foo.py:10, cmk/gui/bar.py:20)"
     )
 
 

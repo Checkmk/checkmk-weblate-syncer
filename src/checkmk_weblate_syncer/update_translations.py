@@ -11,6 +11,7 @@ from .git import commit_and_push_files, repository_in_clean_state
 from .html_tags import forbidden_tags
 from .logger import LOGGER
 from .portable_object import (
+    format_forbidden_tags_error,
     remove_header,
     remove_last_translator,
     remove_source_string_locations,
@@ -116,9 +117,14 @@ def _process_po_file_pair(
         )
 
     LOGGER.info("Checking HTML tags")
-    if forbidden_html_tags := forbidden_tags(remove_header(po_file_content)):
+    body, header_line_count = remove_header(po_file_content)
+    if forbidden_html_tags := forbidden_tags(body):
         return _Failure(
-            error_message=f"Found forbidden HTML tags: {', '.join(sorted(forbidden_html_tags))}",
+            error_message=format_forbidden_tags_error(
+                po_file_content,
+                header_line_count,
+                forbidden_html_tags,
+            ),
             path=locale_po_file,
         )
 
