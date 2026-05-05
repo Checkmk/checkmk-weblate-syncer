@@ -5,7 +5,11 @@ from .config import UpdateSourcesConfig
 from .git import commit_and_push_files, repository_in_clean_state
 from .html_tags import forbidden_tags
 from .logger import LOGGER
-from .portable_object import make_soure_string_locations_relative, remove_header
+from .portable_object import (
+    format_forbidden_tags_error,
+    make_soure_string_locations_relative,
+    remove_header,
+)
 
 
 def run(config: UpdateSourcesConfig) -> int:
@@ -32,11 +36,15 @@ def run(config: UpdateSourcesConfig) -> int:
         raise
 
     LOGGER.info("Checking HTML tags")
-    if forbidden_html_tags := forbidden_tags(remove_header(pot_file_content)):
-        error_msg = (
-            f"Found forbidden HTML tags: {', '.join(sorted(forbidden_html_tags))}"
+    body, header_line_count = remove_header(pot_file_content)
+    if forbidden_html_tags := forbidden_tags(body):
+        raise ValueError(
+            format_forbidden_tags_error(
+                pot_file_content,
+                header_line_count,
+                forbidden_html_tags,
+            ),
         )
-        raise ValueError(error_msg)
 
     LOGGER.info("Making source string locations relative")
     pot_file_content = make_soure_string_locations_relative(

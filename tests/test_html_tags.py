@@ -1,6 +1,6 @@
 import pytest
 
-from checkmk_weblate_syncer.html_tags import forbidden_tags
+from checkmk_weblate_syncer.html_tags import ForbiddenTag, forbidden_tags
 
 
 @pytest.mark.parametrize(
@@ -25,8 +25,24 @@ from checkmk_weblate_syncer.html_tags import forbidden_tags
         pytest.param(
             "123 <script>injection</script>",
             frozenset(
-                ["<script>", "</script>"],
+                {
+                    ForbiddenTag(line=1, tag="<script>"),
+                    ForbiddenTag(line=1, tag="</script>"),
+                },
             ),
+        ),
+        pytest.param(
+            "ok line\nbad <foo> line\nanother bad <bar> line",
+            frozenset(
+                {
+                    ForbiddenTag(line=2, tag="<foo>"),
+                    ForbiddenTag(line=3, tag="<bar>"),
+                },
+            ),
+        ),
+        pytest.param(
+            '"<br><b>Hinweis</>: trailing"',
+            frozenset({ForbiddenTag(line=1, tag="</>")}),
         ),
         pytest.param(
             # pylint: disable=line-too-long
@@ -54,6 +70,6 @@ msgstr ""
 )
 def test_html_tags_checker(
     text: str,
-    expected_result: frozenset[str],
+    expected_result: frozenset[ForbiddenTag],
 ) -> None:
     assert forbidden_tags(text) == expected_result
